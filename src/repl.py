@@ -32,6 +32,9 @@ def execute_line(state: ShellState, line: str) -> str | None:
         state: Текущее состояние сеанса.
         line: Строка, введённая пользователем.
 
+    Каждый вызов команды, успешный или ошибочный, попадает в журнал
+    событий, связанный с состоянием сеанса.
+
     Returns:
         Вывод команды либо ``None``, если строка пуста.
 
@@ -41,15 +44,26 @@ def execute_line(state: ShellState, line: str) -> str | None:
     command = parse_line(line)
     if command is None:
         return None
-    return commands.dispatch(state, command)
+    try:
+        output = commands.dispatch(state, command)
+    except EmulatorError as error:
+        state.log.log_command(command.name, command.args, str(error))
+        raise
+    state.log.log_command(command.name, command.args)
+    return output
 
 
 def report_error(error: EmulatorError) -> None:
     """Печатает сообщение об ошибке в стандартный поток ошибок.
 
+    Перед выводом стандартный поток вывода принудительно сбрасывается,
+    чтобы сообщение не опережало вывод уже выполненных команд при
+    перенаправлении вывода в файл.
+
     Args:
         error: Возникшая ошибка эмулятора.
     """
+    sys.stdout.flush()
     print(f"ошибка: {error}", file=sys.stderr)
 
 
