@@ -71,6 +71,10 @@ def format_path(parts: tuple[str, ...]) -> str:
 def decode_entry(name: str, raw: bytes) -> tuple[str, bytes]:
     """Декодирует содержимое элемента архива.
 
+    Переводы строк внутри данных base64 допускаются: они снимаются
+    перед декодированием, что позволяет хранить длинные данные
+    короткими строками.
+
     Args:
         name: Имя элемента архива без пути.
         raw: Байты, прочитанные из архива.
@@ -84,7 +88,7 @@ def decode_entry(name: str, raw: bytes) -> tuple[str, bytes]:
     if not name.endswith(BASE64_SUFFIX):
         return name, raw
     try:
-        data = base64.b64decode(raw, validate=True)
+        data = base64.b64decode(b"".join(raw.split()), validate=True)
     except (binascii.Error, ValueError) as error:
         raise VfsLoadError(
             f"{name}: неверный формат данных base64"

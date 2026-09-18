@@ -71,6 +71,15 @@ class VfsLoadTest(unittest.TestCase):
         self.assertEqual(node.data, PNG_BYTES)
         self.assertTrue(node.is_binary)
 
+    def test_wrapped_base64_entry_is_decoded(self) -> None:
+        """Данные base64, разбитые на строки, декодируются."""
+        encoded = base64.encodebytes(PNG_BYTES)
+        path = make_archive(self.root / "wrapped.zip",
+                            {"logo.png.b64": encoded})
+        vfs = Vfs.load(path)
+        _, node = vfs.resolve((), "/logo.png")
+        self.assertEqual(node.data, PNG_BYTES)
+
     def test_missing_image_is_reported(self) -> None:
         """Отсутствующий образ VFS порождает ошибку загрузки."""
         with self.assertRaises(VfsLoadError):
