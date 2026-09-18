@@ -3,6 +3,7 @@
 from dataclasses import dataclass, field
 
 from src.logger import EventLog
+from src.vfs import Vfs
 
 DEFAULT_VFS_NAME = "vfs"
 
@@ -14,9 +15,13 @@ class ShellState:
     Attributes:
         vfs_name: Имя VFS, отображаемое в приглашении к вводу.
         log: Журнал событий вызова команд.
+        vfs: Загруженная в память VFS либо ``None``.
+        cwd: Текущий каталог внутри VFS в виде имён от корня.
         running: Признак продолжения диалога; ``False`` после ``exit``.
     """
 
     vfs_name: str = DEFAULT_VFS_NAME
     log: EventLog = field(default_factory=EventLog)
+    vfs: Vfs | None = None
+    cwd: tuple[str, ...] = ()
     running: bool = field(default=True)

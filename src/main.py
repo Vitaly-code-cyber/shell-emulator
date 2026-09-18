@@ -7,15 +7,17 @@ import sys
 from pathlib import Path
 
 from src.cli import Options, format_options, parse_options
-from src.errors import EmulatorError
+from src.errors import EmulatorError, VfsError
 from src.logger import EventLog, XmlEventLog
 from src.repl import report_error, run_interactive
 from src.script import run_script
 from src.state import DEFAULT_VFS_NAME, ShellState
+from src.vfs import Vfs
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 LOG_KIND_STARTUP = "startup"
+LOG_KIND_VFS = "vfs"
 
 
 def vfs_name_from(path: Path | None) -> str:
@@ -43,6 +45,28 @@ def build_state(options: Options) -> ShellState:
     if options.log_path is not None:
         log = XmlEventLog(options.log_path)
     return ShellState(vfs_name=vfs_name_from(options.vfs_path), log=log)
+
+
+def load_vfs(state: ShellState, path: Path) -> bool:
+    """Загружает образ VFS в память и сообщает об ошибках загрузки.
+
+    Args:
+        state: Состояние сеанса, в которое помещается VFS.
+        path: Путь к ZIP-архиву с образом VFS.
+
+    Returns:
+        ``True`` при успешной загрузке, иначе ``False``.
+    """
+    try:
+        state.vfs = Vfs.load(path)
+    except VfsError as error:
+        report_error(error)
+        state.log.log_message(LOG_KIND_VFS, str(error))
+        return False
+    description = state.vfs.describe()
+    print(description)
+    state.log.log_message(LOG_KIND_VFS, description)
+    return True
 
 
 def run_startup_script(state: ShellState, path: Path) -> bool:
@@ -75,6 +99,9 @@ def main(argv: list[str] | None = None) -> int:
     options = parse_options(argv)
     print(format_options(options))
     state = build_state(options)
+    if options.vfs_path is not None:
+        if not load_vfs(state, options.vfs_path):
+            return EXIT_FAILURE
     if options.script_path is not None:
         if not run_startup_script(state, options.script_path):
             return EXIT_FAILURE

@@ -21,3 +21,15 @@ class CommandArgumentError(EmulatorError):
 
 class ScriptError(EmulatorError):
     """Стартовый скрипт недоступен для чтения или повреждён."""
+
+
+class VfsError(EmulatorError):
+    """Базовая ошибка виртуальной файловой системы."""
+
+
+class VfsLoadError(VfsError):
+    """Образ VFS не найден или имеет неверный формат."""
+
+
+class VfsPathError(VfsError):
+    """Путь внутри VFS не существует или указывает не на каталог."""
