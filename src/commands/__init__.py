@@ -7,7 +7,7 @@
 
 from typing import Callable
 
-from src.commands import basic, filesystem
+from src.commands import basic, filesystem, permissions
 from src.errors import UnknownCommandError
 from src.parser import Command
 from src.state import ShellState
@@ -17,6 +17,7 @@ CommandHandler = Callable[[ShellState, tuple[str, ...]], str | None]
 COMMANDS: dict[str, CommandHandler] = {
     "ls": filesystem.cmd_ls,
     "cd": filesystem.cmd_cd,
+    "chmod": permissions.cmd_chmod,
     "echo": basic.cmd_echo,
     "history": basic.cmd_history,
     "exit": basic.cmd_exit,
