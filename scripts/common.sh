@@ -21,3 +21,15 @@ run_emulator() {
     "$EMU" "$@" </dev/null
     echo "[код возврата: $?]"
 }
+
+# Собирает стартовый скрипт из стандартного ввода и запускает на нём
+# эмулятор. Первый аргумент — имя создаваемого скрипта, остальные
+# передаются эмулятору без изменений.
+run_emulator_script() {
+    local name="$1"
+    shift
+    local script="$BUILD_DIR/$name.vsh"
+    cat > "$script"
+    "$EMU" "$@" --script "$script" </dev/null
+    echo "[код возврата: $?]"
+}
