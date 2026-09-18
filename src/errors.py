@@ -17,3 +17,7 @@ class UnknownCommandError(EmulatorError):
 
 class CommandArgumentError(EmulatorError):
     """Команда вызвана с неверным числом или форматом аргументов."""
+
+
+class ScriptError(EmulatorError):
+    """Стартовый скрипт недоступен для чтения или повреждён."""
