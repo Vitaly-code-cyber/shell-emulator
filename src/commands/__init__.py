@@ -2,27 +2,28 @@
 
 Команды хранятся в словаре, а не в цепочке условий: это удерживает
 цикломатическую сложность диспетчера на минимальном уровне и
-позволяет добавлять новые команды на следующих этапах без правки
-логики выполнения.
+позволяет добавлять новые команды без правки логики выполнения.
 """
 
 from typing import Callable
 
-from src.commands import stubs
+from src.commands import basic, filesystem
 from src.errors import UnknownCommandError
 from src.parser import Command
 from src.state import ShellState
 
-CommandHandler = Callable[[ShellState, tuple[str, ...]], str]
+CommandHandler = Callable[[ShellState, tuple[str, ...]], str | None]
 
 COMMANDS: dict[str, CommandHandler] = {
-    "ls": stubs.cmd_ls,
-    "cd": stubs.cmd_cd,
-    "exit": stubs.cmd_exit,
+    "ls": filesystem.cmd_ls,
+    "cd": filesystem.cmd_cd,
+    "echo": basic.cmd_echo,
+    "history": basic.cmd_history,
+    "exit": basic.cmd_exit,
 }
 
 
-def dispatch(state: ShellState, command: Command) -> str:
+def dispatch(state: ShellState, command: Command) -> str | None:
     """Находит обработчик команды и выполняет его.
 
     Args:
@@ -30,7 +31,8 @@ def dispatch(state: ShellState, command: Command) -> str:
         command: Разобранная команда с аргументами.
 
     Returns:
-        Текст, который эмулятор должен показать пользователю.
+        Текст для показа пользователю либо ``None``, если команда
+        ничего не выводит.
 
     Raises:
         UnknownCommandError: Команда отсутствует в реестре.

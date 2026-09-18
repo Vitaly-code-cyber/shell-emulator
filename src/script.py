@@ -73,7 +73,7 @@ def run_script(state: ShellState, path: Path) -> bool:
         except EmulatorError as error:
             _report_script_failure(state, path, number, error)
             return False
-        if output:
+        if output is not None:
             print(output)
         if not state.running:
             break

@@ -17,6 +17,7 @@ class ShellState:
         log: Журнал событий вызова команд.
         vfs: Загруженная в память VFS либо ``None``.
         cwd: Текущий каталог внутри VFS в виде имён от корня.
+        history: Введённые команды в порядке их выполнения.
         running: Признак продолжения диалога; ``False`` после ``exit``.
     """
 
@@ -24,4 +25,5 @@ class ShellState:
     log: EventLog = field(default_factory=EventLog)
     vfs: Vfs | None = None
     cwd: tuple[str, ...] = ()
+    history: list[str] = field(default_factory=list)
     running: bool = field(default=True)

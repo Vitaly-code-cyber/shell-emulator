@@ -11,6 +11,7 @@ from src import commands
 from src.errors import EmulatorError
 from src.parser import parse_line
 from src.state import ShellState
+from src.vfs import format_path
 
 
 def make_prompt(state: ShellState) -> str:
@@ -20,9 +21,9 @@ def make_prompt(state: ShellState) -> str:
         state: Текущее состояние сеанса.
 
     Returns:
-        Строка приглашения, например ``minimal$``.
+        Строка приглашения, например ``minimal:/home/user$``.
     """
-    return f"{state.vfs_name}$ "
+    return f"{state.vfs_name}:{format_path(state.cwd)}$ "
 
 
 def execute_line(state: ShellState, line: str) -> str | None:
@@ -32,11 +33,13 @@ def execute_line(state: ShellState, line: str) -> str | None:
         state: Текущее состояние сеанса.
         line: Строка, введённая пользователем.
 
-    Каждый вызов команды, успешный или ошибочный, попадает в журнал
-    событий, связанный с состоянием сеанса.
+    Каждая непустая строка попадает в историю команд, а каждый вызов
+    команды, успешный или ошибочный, — в журнал событий, связанный с
+    состоянием сеанса.
 
     Returns:
-        Вывод команды либо ``None``, если строка пуста.
+        Вывод команды либо ``None``, если строка пуста или команда
+        ничего не выводит.
 
     Raises:
         EmulatorError: Команда неизвестна или вызвана неверно.
@@ -44,6 +47,7 @@ def execute_line(state: ShellState, line: str) -> str | None:
     command = parse_line(line)
     if command is None:
         return None
+    state.history.append(line.strip())
     try:
         output = commands.dispatch(state, command)
     except EmulatorError as error:
@@ -87,5 +91,5 @@ def run_interactive(state: ShellState) -> None:
         except EmulatorError as error:
             report_error(error)
             continue
-        if output:
+        if output is not None:
             print(output)
