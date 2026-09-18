@@ -1,0 +1,24 @@
+# Служебные файлы Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# Артефакты сборки: собранные ZIP-образы VFS и логи
+build/
+*.zip
+*.log
+logs/
+
+# Виртуальные окружения
+.venv/
+venv/
+
+# Настройки редакторов кода
+.vscode/
+.idea/
+*.swp
+
+# Служебные файлы macOS
+.DS_Store
