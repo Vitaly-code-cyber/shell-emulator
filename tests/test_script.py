@@ -56,19 +56,19 @@ class ScriptRunnerTest(unittest.TestCase):
 
     def test_script_echoes_input_and_output(self) -> None:
         """При выполнении отображается и ввод, и вывод команд."""
-        path = self._write_script("ls -l\n")
+        path = self._write_script("echo привет\n")
         completed, output = run_script_quietly(self.state, path)
         self.assertTrue(completed)
-        self.assertIn("test$ ls -l", output)
-        self.assertIn("ls: аргументы = [-l]", output)
+        self.assertIn("test:/$ echo привет", output)
+        self.assertIn("\nпривет\n", output)
 
     def test_script_stops_at_first_error(self) -> None:
         """Выполнение прекращается на первой ошибочной команде."""
-        path = self._write_script("ls\nwget\ncd /home\n")
+        path = self._write_script("echo начало\nwget\necho конец\n")
         completed, output = run_script_quietly(self.state, path)
         self.assertFalse(completed)
         self.assertIn("команда не найдена", output)
-        self.assertNotIn("cd: аргументы", output)
+        self.assertNotIn("конец", output)
 
     def test_missing_script_raises_error(self) -> None:
         """Отсутствующий файл скрипта порождает ошибку эмулятора."""
